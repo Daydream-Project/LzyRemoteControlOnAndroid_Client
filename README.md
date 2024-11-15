@@ -1,0 +1,2 @@
+# LzyRemoteControlOnAndroid_Client
+Client for LzyRemoteControlOnAndroid Server
