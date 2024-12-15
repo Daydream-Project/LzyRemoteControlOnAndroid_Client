@@ -1,4 +1,4 @@
-package com.lzy.remote_control
+package com.lzy.remote_control.network
 
 import com.lzy.remote_control.protocol.BROADCAST_INFO_PORT
 import com.lzy.remote_control.protocol.BroadcastRemoteControlServer
@@ -10,15 +10,16 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 
-class FindDeviceThread(deviceList: ListView<String>): Thread() {
-    private val listControl = deviceList
-
+class FindDeviceThread(private val callback: FindDeviceCallback): Thread() {
     private var terminateFlag = false
 
     fun terminate() {
         synchronized(this) {
             terminateFlag = true
         }
+        if (Thread.currentThread().id == id)
+            return
+        while (state != Thread.State.TERMINATED) continue
     }
 
     override fun run() {
@@ -60,6 +61,7 @@ class FindDeviceThread(deviceList: ListView<String>): Thread() {
                 if (protocolPackage.content is BroadcastRemoteControlServer) {
                     val info = protocolPackage.content as BroadcastRemoteControlServer
                     val ipCopy = info.ip
+                    val portCopy = info.port
 
                     var ipIsValid = false
 
@@ -74,13 +76,13 @@ class FindDeviceThread(deviceList: ListView<String>): Thread() {
                     if (ipIsValid && deviceList.find { it == info.ip } == null) {
                         deviceList.add(ipCopy)
 
-                        Platform.runLater {
-                            listControl.items.add(ipCopy)
-                        }
+                        callback.onDeviceFound(ipCopy, portCopy)
                     }
                 }
 
                 receiveBuffer.position(0)
+            } else {
+                sleep(1)
             }
 
             //read terminate flag.

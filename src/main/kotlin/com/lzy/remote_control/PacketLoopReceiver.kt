@@ -5,14 +5,10 @@ import com.lzy.remote_control.protocol.NetworkPacket
 import com.lzy.remote_control.protocol.ubytesToInt
 import javafx.application.Platform
 
-class PacketLoopReceiver(_sslThread: SSLThread, _callback: PacketReceiveHandler) : SSLThreadTransferCallback {
+class PacketLoopReceiver(private val sslThread: SSLThread, private val callback: PacketReceiveHandler) : SSLThreadTransferCallback {
     private var recvStep = 1
     private var bytesRemain = LENGTH_BEFORE_CONTENT
     private var contentLength = 0
-
-    private val sslThread = _sslThread
-
-    private val callback = _callback
 
     private val beforeContentBuffer = ByteArray(LENGTH_BEFORE_CONTENT)
     private val afterContentBuffer = ByteArray(LENGTH_AFTER_CONTENT)
@@ -29,7 +25,7 @@ class PacketLoopReceiver(_sslThread: SSLThread, _callback: PacketReceiveHandler)
         private const val CONTENT_LENGTH_OFFSET = 7
     }
 
-    fun postReceiveBytes() {
+    fun postReceiveOperation() {
         val messageParam = SSLThreadTransferParam(ByteArray(0), 0, 0, true, this)
 
         synchronized(this) {
@@ -105,7 +101,7 @@ class PacketLoopReceiver(_sslThread: SSLThread, _callback: PacketReceiveHandler)
                     }
                 }
             }
-            postReceiveBytes()
+            postReceiveOperation()
         }
         else {
             Platform.runLater {

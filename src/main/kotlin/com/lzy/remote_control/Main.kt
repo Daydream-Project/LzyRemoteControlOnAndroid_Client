@@ -10,11 +10,11 @@ class KotlinJavaFXApp : Application() {
     private var mainWindowObj: FXMLLoader? = null
 
     companion object {
-        private const val mainWindowFile = "/MainWindow.fxml"
+        private const val MAIN_WINDOW_FILE = "/MainWindow.fxml"
     }
 
     override fun start(primaryStage: Stage) {
-        mainWindowObj = FXMLLoader(javaClass.getResource(mainWindowFile))
+        mainWindowObj = FXMLLoader(javaClass.getResource(MAIN_WINDOW_FILE))
         primaryStage.title = "LzyRemoteControl Client"
         primaryStage.scene = Scene(mainWindowObj!!.load())
         primaryStage.show()
